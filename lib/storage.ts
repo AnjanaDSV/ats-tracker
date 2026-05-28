@@ -116,3 +116,11 @@ export function exportJobsAsJSON(): void {
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
 }
+
+// ── Clear all ─────────────────────────────────────────────────────────────────
+
+export function clearAllData(): void {
+  if (typeof window === 'undefined') return;
+  localStorage.removeItem(JOBS_KEY);
+  localStorage.removeItem(RESUME_KEY);
+}

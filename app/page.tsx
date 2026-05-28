@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { getJobs, getDashboardStats, DashboardStats } from '@/lib/storage';
+import { getJobs, getDashboardStats, clearAllData, DashboardStats } from '@/lib/storage';
 import { JobApplication } from '@/lib/types';
 import StatusBadge from '@/components/StatusBadge';
 import {
@@ -14,6 +14,8 @@ import {
   PlusCircle,
   ArrowRight,
   Sparkles,
+  Trash2,
+  AlertTriangle,
 } from 'lucide-react';
 
 interface StatCardProps {
@@ -48,12 +50,20 @@ export default function DashboardPage() {
     interviews: 0,
     offers: 0,
   });
+  const [clearStep, setClearStep] = useState<'idle' | 'confirm'>('idle');
 
   useEffect(() => {
     const all = getJobs();
     setJobs(all);
     setStats(getDashboardStats(all));
   }, []);
+
+  function handleClearAll() {
+    clearAllData();
+    setJobs([]);
+    setStats({ total: 0, responseRate: 0, ghostRate: 0, interviews: 0, offers: 0 });
+    setClearStep('idle');
+  }
 
   const recent = jobs.slice(0, 5);
 
@@ -206,6 +216,66 @@ export default function DashboardPage() {
             <p className="text-xs text-bark-400 mt-0.5">Compare resume to job description</p>
           </div>
         </Link>
+      </div>
+
+      {/* ── Danger Zone ───────────────────────────────────────────────────────── */}
+      <div className="mt-14 border-t border-cream-300 pt-8">
+        <h3 className="text-sm font-semibold text-bark-400 uppercase tracking-widest mb-4">
+          Danger Zone
+        </h3>
+
+        <div className="rounded-2xl border border-rose-200 bg-rose-50/50 p-5">
+          {clearStep === 'idle' ? (
+            <div className="flex items-center justify-between gap-4 flex-wrap">
+              <div>
+                <p className="text-sm font-semibold text-bark-700">Clear All Data</p>
+                <p className="text-xs text-bark-400 mt-0.5">
+                  Permanently delete all {jobs.length > 0 ? `${jobs.length} application${jobs.length !== 1 ? 's' : ''} and your` : 'applications and'} saved resume. Use this to start fresh.
+                </p>
+              </div>
+              <button
+                onClick={() => setClearStep('confirm')}
+                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-rose-600 bg-white border border-rose-200 rounded-xl hover:bg-rose-50 hover:border-rose-300 transition-colors shrink-0"
+              >
+                <Trash2 className="w-4 h-4" />
+                Clear All Data
+              </button>
+            </div>
+          ) : (
+            <div className="animate-fade-in">
+              <div className="flex items-start gap-3 mb-4">
+                <AlertTriangle className="w-5 h-5 text-rose-500 shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-sm font-semibold text-rose-700">Are you absolutely sure?</p>
+                  <p className="text-xs text-rose-600 mt-0.5">
+                    This will permanently delete{' '}
+                    <span className="font-bold">
+                      {jobs.length} application{jobs.length !== 1 ? 's' : ''}
+                    </span>{' '}
+                    and your saved resume. This cannot be undone.
+                    {jobs.length > 0 && (
+                      <> Consider <Link href="/jobs" className="underline font-semibold" onClick={() => setClearStep('idle')}>exporting a backup</Link> first.</>
+                    )}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleClearAll}
+                  className="px-4 py-2 text-sm font-semibold bg-rose-500 text-white rounded-xl hover:bg-rose-600 transition-colors shadow-sm"
+                >
+                  Yes, delete everything
+                </button>
+                <button
+                  onClick={() => setClearStep('idle')}
+                  className="px-4 py-2 text-sm font-medium text-bark-500 bg-white border border-cream-300 rounded-xl hover:bg-cream-100 transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
