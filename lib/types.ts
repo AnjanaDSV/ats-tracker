@@ -19,6 +19,8 @@ export interface JobApplication {
   id: string;
   company: string;
   role: string;
+  url: string;               // link to the job posting
+  salaryRange: string;       // e.g. "$120k–$150k"
   dateApplied: string;       // ISO date string YYYY-MM-DD
   jobDescription: string;
   status: JobStatus;

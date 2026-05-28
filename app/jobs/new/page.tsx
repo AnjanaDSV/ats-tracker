@@ -10,6 +10,8 @@ import Link from 'next/link';
 const EMPTY_FORM: JobFormData = {
   company: '',
   role: '',
+  url: '',
+  salaryRange: '',
   dateApplied: new Date().toISOString().split('T')[0],
   jobDescription: '',
   status: 'Applied',
@@ -102,6 +104,36 @@ export default function NewJobPage() {
           </div>
         </div>
 
+        {/* Job URL & Salary */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-bark-700 mb-1.5">
+              Job Posting URL
+            </label>
+            <input
+              type="text"
+              name="url"
+              value={form.url}
+              onChange={handleChange}
+              placeholder="https://jobs.company.com/…"
+              className="w-full px-4 py-2.5 text-sm rounded-xl border border-cream-300 bg-white"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-bark-700 mb-1.5">
+              Salary Range
+            </label>
+            <input
+              type="text"
+              name="salaryRange"
+              value={form.salaryRange}
+              onChange={handleChange}
+              placeholder="e.g. $120k – $150k"
+              className="w-full px-4 py-2.5 text-sm rounded-xl border border-cream-300 bg-white"
+            />
+          </div>
+        </div>
+
         {/* Date & Status */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
@@ -161,7 +193,7 @@ export default function NewJobPage() {
             value={form.notes}
             onChange={handleChange}
             rows={3}
-            placeholder="Recruiter contact, interview details, salary range…"
+            placeholder="Recruiter contact, interview details, next steps…"
             className="w-full px-4 py-3 text-sm rounded-xl border border-cream-300 bg-white resize-none"
           />
         </div>

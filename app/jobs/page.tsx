@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { getJobs, deleteJob } from '@/lib/storage';
+import { getJobs, deleteJob, exportJobsAsJSON } from '@/lib/storage';
 import { JobApplication, JobStatus, JOB_STATUSES } from '@/lib/types';
 import StatusBadge from '@/components/StatusBadge';
 import {
@@ -12,6 +12,7 @@ import {
   ExternalLink,
   Briefcase,
   Filter,
+  Download,
 } from 'lucide-react';
 
 export default function JobsPage() {
@@ -49,13 +50,25 @@ export default function JobsPage() {
             {filtered.length} of {jobs.length} job{jobs.length !== 1 ? 's' : ''}
           </p>
         </div>
-        <Link
-          href="/jobs/new"
-          className="inline-flex items-center gap-2 px-4 py-2.5 bg-bark-600 text-cream-50 text-sm font-medium rounded-xl hover:bg-bark-700 transition-colors shadow-sm"
-        >
-          <PlusCircle className="w-4 h-4" />
-          Add Job
-        </Link>
+        <div className="flex items-center gap-2">
+          {jobs.length > 0 && (
+            <button
+              onClick={exportJobsAsJSON}
+              className="inline-flex items-center gap-2 px-4 py-2.5 bg-cream-100 border border-cream-300 text-bark-600 text-sm font-medium rounded-xl hover:bg-cream-200 transition-colors"
+              title="Export all jobs as JSON"
+            >
+              <Download className="w-4 h-4" />
+              Export
+            </button>
+          )}
+          <Link
+            href="/jobs/new"
+            className="inline-flex items-center gap-2 px-4 py-2.5 bg-bark-600 text-cream-50 text-sm font-medium rounded-xl hover:bg-bark-700 transition-colors shadow-sm"
+          >
+            <PlusCircle className="w-4 h-4" />
+            Add Job
+          </Link>
+        </div>
       </div>
 
       {/* Filters */}

@@ -18,6 +18,9 @@ import {
   Briefcase,
   FileText,
   StickyNote,
+  Link2,
+  DollarSign,
+  ExternalLink,
 } from 'lucide-react';
 
 export default function JobDetailPage() {
@@ -34,14 +37,13 @@ export default function JobDetailPage() {
 
   useEffect(() => {
     const found = getJob(id);
-    if (!found) {
-      setNotFound(true);
-      return;
-    }
+    if (!found) { setNotFound(true); return; }
     setJob(found);
     setForm({
       company: found.company,
       role: found.role,
+      url: found.url ?? '',
+      salaryRange: found.salaryRange ?? '',
       dateApplied: found.dateApplied,
       jobDescription: found.jobDescription,
       status: found.status,
@@ -63,6 +65,21 @@ export default function JobDetailPage() {
     if (updated) setJob(updated);
     setSaving(false);
     setEditing(false);
+  }
+
+  function cancelEdit() {
+    if (!job) return;
+    setEditing(false);
+    setForm({
+      company: job.company,
+      role: job.role,
+      url: job.url ?? '',
+      salaryRange: job.salaryRange ?? '',
+      dateApplied: job.dateApplied,
+      jobDescription: job.jobDescription,
+      status: job.status,
+      notes: job.notes,
+    });
   }
 
   function handleDelete() {
@@ -153,17 +170,7 @@ export default function JobDetailPage() {
                 {saving ? 'Saving…' : 'Save'}
               </button>
               <button
-                onClick={() => {
-                  setEditing(false);
-                  setForm({
-                    company: job.company,
-                    role: job.role,
-                    dateApplied: job.dateApplied,
-                    jobDescription: job.jobDescription,
-                    status: job.status,
-                    notes: job.notes,
-                  });
-                }}
+                onClick={cancelEdit}
                 className="p-2 text-bark-400 hover:text-bark-600 hover:bg-cream-200 rounded-xl transition-colors"
               >
                 <X className="w-4 h-4" />
@@ -175,17 +182,34 @@ export default function JobDetailPage() {
 
       {/* Status badge (view mode) */}
       {!editing && (
-        <div className="mb-6">
+        <div className="mb-6 flex items-center gap-3 flex-wrap">
           <StatusBadge status={job.status} />
+          {job.salaryRange && (
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium bg-cream-200 text-bark-600 rounded-full border border-cream-300">
+              <DollarSign className="w-3 h-3" />
+              {job.salaryRange}
+            </span>
+          )}
+          {job.url && (
+            <a
+              href={job.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium bg-sky-50 text-sky-600 rounded-full border border-sky-200 hover:bg-sky-100 transition-colors"
+            >
+              <ExternalLink className="w-3 h-3" />
+              View Posting
+            </a>
+          )}
         </div>
       )}
 
       <div className="space-y-5">
-        {/* Company & Role */}
+        {/* Company & Role (edit mode) */}
         {editing && (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="field-label flex items-center gap-1.5 text-sm font-medium text-bark-600 mb-1.5">
+              <label className="flex items-center gap-1.5 text-sm font-medium text-bark-600 mb-1.5">
                 <Building2 className="w-3.5 h-3.5" /> Company
               </label>
               <input
@@ -197,7 +221,7 @@ export default function JobDetailPage() {
               />
             </div>
             <div>
-              <label className="field-label flex items-center gap-1.5 text-sm font-medium text-bark-600 mb-1.5">
+              <label className="flex items-center gap-1.5 text-sm font-medium text-bark-600 mb-1.5">
                 <Briefcase className="w-3.5 h-3.5" /> Role
               </label>
               <input
@@ -205,6 +229,38 @@ export default function JobDetailPage() {
                 name="role"
                 value={form.role}
                 onChange={handleChange}
+                className="w-full px-4 py-2.5 text-sm rounded-xl border border-cream-300 bg-white"
+              />
+            </div>
+          </div>
+        )}
+
+        {/* URL & Salary (edit mode) */}
+        {editing && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="flex items-center gap-1.5 text-sm font-medium text-bark-600 mb-1.5">
+                <Link2 className="w-3.5 h-3.5" /> Job Posting URL
+              </label>
+              <input
+                type="text"
+                name="url"
+                value={form.url}
+                onChange={handleChange}
+                placeholder="https://…"
+                className="w-full px-4 py-2.5 text-sm rounded-xl border border-cream-300 bg-white"
+              />
+            </div>
+            <div>
+              <label className="flex items-center gap-1.5 text-sm font-medium text-bark-600 mb-1.5">
+                <DollarSign className="w-3.5 h-3.5" /> Salary Range
+              </label>
+              <input
+                type="text"
+                name="salaryRange"
+                value={form.salaryRange}
+                onChange={handleChange}
+                placeholder="e.g. $120k – $150k"
                 className="w-full px-4 py-2.5 text-sm rounded-xl border border-cream-300 bg-white"
               />
             </div>
@@ -228,10 +284,7 @@ export default function JobDetailPage() {
             ) : (
               <p className="text-bark-800 text-sm px-4 py-2.5 bg-cream-100 rounded-xl border border-cream-300">
                 {new Date(job.dateApplied).toLocaleDateString('en-US', {
-                  weekday: 'short',
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric',
+                  weekday: 'short', year: 'numeric', month: 'long', day: 'numeric',
                 })}
               </p>
             )}

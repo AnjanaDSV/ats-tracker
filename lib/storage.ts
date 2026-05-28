@@ -97,3 +97,22 @@ export function getDashboardStats(jobs: JobApplication[]): DashboardStats {
     offers,
   };
 }
+
+// ── Export / Import ───────────────────────────────────────────────────────────
+
+export function exportJobsAsJSON(): void {
+  if (typeof window === 'undefined') return;
+  const jobs = getJobs();
+  const payload = { exportedAt: new Date().toISOString(), version: 1, jobs };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], {
+    type: 'application/json',
+  });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `track-jobs-${new Date().toISOString().split('T')[0]}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
