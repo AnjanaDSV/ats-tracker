@@ -1,42 +1,23 @@
 const fs = require('fs');
 const path = require('path');
 
-function loadEnv() {
-  // Priority order: .env.local overrides .env (mirrors Next.js convention)
-  const envFiles = ['.env.local', '.env'];
-  for (const filename of envFiles) {
-    const envPath = path.join(__dirname, filename);
-    try {
-      if (fs.existsSync(envPath)) {
-        const content = fs.readFileSync(envPath, 'utf8');
-        for (const line of content.split('\n')) {
-          const trimmed = line.trim();
-          if (trimmed && !trimmed.startsWith('#') && trimmed.includes('=')) {
-            const eqIdx = trimmed.indexOf('=');
-            const key = trimmed.slice(0, eqIdx).trim();
-            const value = trimmed.slice(eqIdx + 1).trim();
-            // Only set if not already defined (first file wins)
-            if (key && !process.env[key]) {
-              process.env[key] = value;
-            }
-          }
-        }
-        console.log(`[next.config] Loaded env from ${filename}`);
-      }
-    } catch (err) {
-      console.error(`[next.config] Error loading ${filename}:`, err);
-    }
-  }
+// ── Load .env.local exactly like pulse-ai (proven working) ───────────────────
+try {
+  const envFile = fs.readFileSync(path.join(__dirname, '.env.local'), 'utf8');
+  envFile.split(/\r?\n/).forEach(line => {
+    const match = line.match(/^([^=#][^=]*)=(.+)$/);
+    if (match) process.env[match[1].trim()] = match[2].trim();
+  });
+  console.log('[next.config.js] .env.local loaded, ANTHROPIC_API_KEY set:', !!process.env.ANTHROPIC_API_KEY);
+} catch (e) {
+  console.warn('[next.config.js] Could not load .env.local:', e.message);
 }
 
-loadEnv();
-
 /** @type {import('next').NextConfig} */
-const nextConfig = {
+module.exports = {
   reactStrictMode: true,
   webpack: (config, { isServer }) => {
     if (!isServer) {
-      // Prevent server-only packages from being bundled for the browser
       config.resolve.fallback = {
         ...config.resolve.fallback,
         fs: false,
@@ -48,5 +29,3 @@ const nextConfig = {
     return config;
   },
 };
-
-module.exports = nextConfig;
