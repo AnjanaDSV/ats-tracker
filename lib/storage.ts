@@ -117,10 +117,74 @@ export function exportJobsAsJSON(): void {
   URL.revokeObjectURL(url);
 }
 
+// ── Gaps ──────────────────────────────────────────────────────────────────────
+
+const GAPS_KEY = 'track_gaps_v1';
+
+export type GapCategory = 'tools' | 'concepts' | 'domain' | 'certs';
+export type GapPriority = 'high' | 'medium' | 'low';
+export type GapStatus = 'Open' | 'Learning' | 'Done';
+
+export interface SkillGap {
+  id: string;
+  name: string;
+  category: GapCategory;
+  priority: GapPriority;
+  status: GapStatus;
+  howToFix: string;
+  companies: string;   // comma-separated
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type GapFormData = Omit<SkillGap, 'id' | 'createdAt' | 'updatedAt'>;
+
+export function getGaps(): SkillGap[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    const raw = localStorage.getItem(GAPS_KEY);
+    return raw ? (JSON.parse(raw) as SkillGap[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveGaps(gaps: SkillGap[]): void {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem(GAPS_KEY, JSON.stringify(gaps));
+}
+
+export function addGap(data: GapFormData): SkillGap {
+  const gap: SkillGap = {
+    ...data,
+    id: crypto.randomUUID(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+  const gaps = getGaps();
+  gaps.unshift(gap);
+  saveGaps(gaps);
+  return gap;
+}
+
+export function updateGap(id: string, updates: Partial<GapFormData>): SkillGap | null {
+  const gaps = getGaps();
+  const idx = gaps.findIndex((g) => g.id === id);
+  if (idx === -1) return null;
+  gaps[idx] = { ...gaps[idx], ...updates, updatedAt: new Date().toISOString() };
+  saveGaps(gaps);
+  return gaps[idx];
+}
+
+export function deleteGap(id: string): void {
+  saveGaps(getGaps().filter((g) => g.id !== id));
+}
+
 // ── Clear all ─────────────────────────────────────────────────────────────────
 
 export function clearAllData(): void {
   if (typeof window === 'undefined') return;
   localStorage.removeItem(JOBS_KEY);
   localStorage.removeItem(RESUME_KEY);
+  localStorage.removeItem(GAPS_KEY);
 }

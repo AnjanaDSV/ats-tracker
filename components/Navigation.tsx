@@ -8,6 +8,7 @@ import {
   PlusCircle,
   Sparkles,
   FileText,
+  Target,
 } from 'lucide-react';
 
 const links = [
@@ -16,6 +17,7 @@ const links = [
   { href: '/jobs/new',  label: 'Add Job',   icon: PlusCircle      },
   { href: '/keywords',  label: 'AI Matcher',icon: Sparkles        },
   { href: '/resume',    label: 'Resume',    icon: FileText        },
+  { href: '/gaps',      label: 'Gaps',      icon: Target          },
 ];
 
 export default function Navigation() {
