@@ -6,6 +6,8 @@ interface Props {
 }
 
 const config: Record<JobStatus, { bg: string; text: string; ring: string }> = {
+  Browsing:      { bg: 'bg-cream-100',  text: 'text-bark-500',   ring: 'ring-cream-300'  },
+  'Skill Gap':   { bg: 'bg-orange-100', text: 'text-orange-700', ring: 'ring-orange-200' },
   Applied:       { bg: 'bg-sky-100',    text: 'text-sky-700',    ring: 'ring-sky-200'    },
   'Phone Screen':{ bg: 'bg-violet-100', text: 'text-violet-700', ring: 'ring-violet-200' },
   Interview:     { bg: 'bg-amber-100',  text: 'text-amber-700',  ring: 'ring-amber-200'  },

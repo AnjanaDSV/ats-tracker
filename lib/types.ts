@@ -1,4 +1,6 @@
 export type JobStatus =
+  | 'Browsing'
+  | 'Skill Gap'
   | 'Applied'
   | 'Phone Screen'
   | 'Interview'
@@ -7,6 +9,8 @@ export type JobStatus =
   | 'Ghosted';
 
 export const JOB_STATUSES: JobStatus[] = [
+  'Browsing',
+  'Skill Gap',
   'Applied',
   'Phone Screen',
   'Interview',
