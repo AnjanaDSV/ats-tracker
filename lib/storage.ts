@@ -73,12 +73,13 @@ export interface DashboardStats {
   ghostRate: number;      // %
   interviews: number;
   offers: number;
+  skillGap: number;
 }
 
 export function getDashboardStats(jobs: JobApplication[]): DashboardStats {
   const total = jobs.length;
   if (total === 0) {
-    return { total: 0, responseRate: 0, ghostRate: 0, interviews: 0, offers: 0 };
+    return { total: 0, responseRate: 0, ghostRate: 0, interviews: 0, offers: 0, skillGap: 0 };
   }
 
   const responded = jobs.filter((j) =>
@@ -88,6 +89,7 @@ export function getDashboardStats(jobs: JobApplication[]): DashboardStats {
   const ghosted = jobs.filter((j) => j.status === 'Ghosted').length;
   const interviews = jobs.filter((j) => j.status === 'Interview').length;
   const offers = jobs.filter((j) => j.status === 'Offer').length;
+  const skillGap = jobs.filter((j) => j.status === 'Skill Gap').length;
 
   return {
     total,
@@ -95,6 +97,7 @@ export function getDashboardStats(jobs: JobApplication[]): DashboardStats {
     ghostRate: Math.round((ghosted / total) * 100),
     interviews,
     offers,
+    skillGap,
   };
 }
 

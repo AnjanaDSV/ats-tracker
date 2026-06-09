@@ -16,6 +16,7 @@ import {
   Sparkles,
   Trash2,
   AlertTriangle,
+  Target,
 } from 'lucide-react';
 
 interface StatCardProps {
@@ -49,6 +50,7 @@ export default function DashboardPage() {
     ghostRate: 0,
     interviews: 0,
     offers: 0,
+    skillGap: 0,
   });
   const [clearStep, setClearStep] = useState<'idle' | 'confirm'>('idle');
 
@@ -61,7 +63,7 @@ export default function DashboardPage() {
   function handleClearAll() {
     clearAllData();
     setJobs([]);
-    setStats({ total: 0, responseRate: 0, ghostRate: 0, interviews: 0, offers: 0 });
+    setStats({ total: 0, responseRate: 0, ghostRate: 0, interviews: 0, offers: 0, skillGap: 0 });
     setClearStep('idle');
   }
 
@@ -83,7 +85,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Stats grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-10">
         <StatCard
           icon={<Briefcase className="w-5 h-5" />}
           label="Total Applied"
@@ -111,6 +113,13 @@ export default function DashboardPage() {
           value={stats.interviews}
           sub="scheduled / in progress"
           accent="bg-amber-50"
+        />
+        <StatCard
+          icon={<Target className="w-5 h-5" />}
+          label="Skill Gap Roles"
+          value={stats.skillGap}
+          sub="building toward"
+          accent="bg-orange-50"
         />
       </div>
 
