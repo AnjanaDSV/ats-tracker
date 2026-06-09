@@ -2,9 +2,9 @@
 
 import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { getJobs, getResume } from '@/lib/storage';
+import { getJobs, getResume, addGap, getGaps } from '@/lib/storage';
 import { JobApplication, KeywordAnalysis } from '@/lib/types';
-import { Sparkles, AlertCircle, CheckCircle2, XCircle, Loader2, FileText } from 'lucide-react';
+import { Sparkles, AlertCircle, CheckCircle2, XCircle, Loader2, FileText, PlusCircle } from 'lucide-react';
 import Link from 'next/link';
 
 function KeywordsContent() {
@@ -18,6 +18,7 @@ function KeywordsContent() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [result, setResult] = useState<KeywordAnalysis | null>(null);
+  const [addedToGaps, setAddedToGaps] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     const allJobs = getJobs();
@@ -67,12 +68,33 @@ function KeywordsContent() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Analysis failed');
-      setResult(data as KeywordAnalysis);
+      const analysis = data as KeywordAnalysis;
+      setResult(analysis);
+      // Pre-mark any keywords already in gaps
+      const existingGapNames = new Set(getGaps().map((g) => g.name.toLowerCase()));
+      const alreadyAdded = new Set(
+        analysis.missingKeywords.filter((kw) => existingGapNames.has(kw.toLowerCase()))
+      );
+      setAddedToGaps(alreadyAdded);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Something went wrong.');
     } finally {
       setLoading(false);
     }
+  }
+
+  function handleAddToGaps(kw: string) {
+    addGap({
+      name: kw,
+      category: 'tools',
+      priority: 'medium',
+      status: 'Open',
+      howToFix: '',
+      companies: selectedJobId
+        ? (jobs.find((j) => j.id === selectedJobId)?.company ?? '')
+        : '',
+    });
+    setAddedToGaps((prev) => new Set(prev).add(kw));
   }
 
   const scoreColor =
@@ -256,17 +278,31 @@ function KeywordsContent() {
                 </h4>
               </div>
               <div className="flex flex-wrap gap-2">
-                {result.missingKeywords.map((kw) => (
-                  <span
-                    key={kw}
-                    className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-rose-100 text-rose-700 ring-1 ring-rose-200"
-                  >
-                    {kw}
-                  </span>
-                ))}
+                {result.missingKeywords.map((kw) => {
+                  const added = addedToGaps.has(kw);
+                  return (
+                    <span
+                      key={kw}
+                      className="inline-flex items-center gap-1.5 pl-3 pr-1.5 py-1 rounded-full text-xs font-medium bg-rose-100 text-rose-700 ring-1 ring-rose-200"
+                    >
+                      {kw}
+                      <button
+                        onClick={() => !added && handleAddToGaps(kw)}
+                        title={added ? 'Already in Gaps' : 'Add to Gaps'}
+                        className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-semibold transition-colors ${
+                          added
+                            ? 'bg-emerald-200 text-emerald-700 cursor-default'
+                            : 'bg-rose-200 text-rose-700 hover:bg-bark-600 hover:text-white cursor-pointer'
+                        }`}
+                      >
+                        {added ? '✓ added' : <><PlusCircle className="w-2.5 h-2.5" /> gap</>}
+                      </button>
+                    </span>
+                  );
+                })}
               </div>
               <p className="text-xs text-bark-400 mt-3">
-                Consider adding these to your resume or cover letter if you have the relevant experience.
+                Hit <span className="font-medium text-bark-500">+ gap</span> on any keyword to track it in your Gaps tab.
               </p>
             </div>
           )}
