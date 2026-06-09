@@ -139,11 +139,44 @@ export interface SkillGap {
 
 export type GapFormData = Omit<SkillGap, 'id' | 'createdAt' | 'updatedAt'>;
 
+const DEFAULT_GAPS: Omit<SkillGap, 'id' | 'createdAt' | 'updatedAt'>[] = [
+  { name: 'dbt advanced (macros, Jinja, DRY)', category: 'tools', priority: 'high', status: 'Open', howToFix: 'Build dbt project with custom macros', companies: 'CrowdStrike, Lovevery' },
+  { name: 'DataDog monitoring', category: 'tools', priority: 'high', status: 'Open', howToFix: 'Add to HIPAA engine free 14-day trial', companies: 'Wurl, FedEx' },
+  { name: 'Medallion architecture', category: 'concepts', priority: 'high', status: 'Open', howToFix: 'Use bronze/silver/gold naming in Databricks projects', companies: 'Dow, MVB Bank' },
+  { name: 'Databricks certification', category: 'certs', priority: 'high', status: 'Open', howToFix: 'July exam plan already set', companies: 'Humana, Dow, FedEx' },
+  { name: 'Jenkins/GitLab CI/CD', category: 'tools', priority: 'medium', status: 'Open', howToFix: 'Add GitLab pipeline to one project', companies: 'CrowdStrike' },
+  { name: 'SCD (Slowly Changing Dimensions)', category: 'concepts', priority: 'medium', status: 'Open', howToFix: 'Study dbt SCD docs', companies: 'Dow, Lovevery' },
+  { name: 'Delta Live Tables', category: 'tools', priority: 'medium', status: 'Open', howToFix: 'Databricks community edition practice', companies: 'Dow' },
+  { name: 'Great Expectations', category: 'tools', priority: 'medium', status: 'Open', howToFix: 'Add to HIPAA engine validation', companies: 'Dow' },
+  { name: 'Semantic layer explicit', category: 'concepts', priority: 'medium', status: 'Open', howToFix: 'Add exact phrase to resume', companies: 'CrowdStrike, Lovevery' },
+  { name: 'Looker/Tableau', category: 'tools', priority: 'medium', status: 'Open', howToFix: 'Looker free trial', companies: 'Lovevery, Paramount' },
+  { name: 'LLM evaluation/eval harnesses', category: 'concepts', priority: 'medium', status: 'Open', howToFix: 'LangSmith free tier', companies: 'Tern, Red Hat' },
+  { name: 'Revenue attribution', category: 'concepts', priority: 'medium', status: 'Open', howToFix: 'Reframe Albertsons monetization work', companies: 'CrowdStrike, Wurl' },
+  { name: 'AWS Cloud Practitioner cert', category: 'certs', priority: 'medium', status: 'Open', howToFix: 'Already planned', companies: 'MVB Bank' },
+  { name: 'SSIS/SSMS', category: 'tools', priority: 'medium', status: 'Open', howToFix: 'One tutorial sufficient', companies: 'Humana' },
+  { name: 'Marketo/People.ai/Outreach', category: 'tools', priority: 'low', status: 'Open', howToFix: 'Read product docs only', companies: 'CrowdStrike' },
+  { name: 'Dagster/Prefect', category: 'tools', priority: 'low', status: 'Open', howToFix: 'One tutorial covers basics', companies: 'Lovevery' },
+  { name: 'Apache Iceberg', category: 'tools', priority: 'low', status: 'Open', howToFix: 'Read docs + one tutorial', companies: '' },
+  { name: 'Neo4j/CosmosDB', category: 'tools', priority: 'low', status: 'Open', howToFix: 'Understand concepts for interviews', companies: 'Dow' },
+  { name: 'Microsoft Fabric/OneLake', category: 'tools', priority: 'low', status: 'Open', howToFix: 'Free trial if targeting Microsoft shops', companies: 'Bulfinch' },
+  { name: 'OTT/streaming domain', category: 'domain', priority: 'low', status: 'Open', howToFix: 'Read HLS/DASH formats basics', companies: 'Wurl, Paramount' },
+];
+
 export function getGaps(): SkillGap[] {
   if (typeof window === 'undefined') return [];
   try {
     const raw = localStorage.getItem(GAPS_KEY);
-    return raw ? (JSON.parse(raw) as SkillGap[]) : [];
+    if (raw) return JSON.parse(raw) as SkillGap[];
+    // First visit — seed with defaults
+    const now = new Date().toISOString();
+    const seeded: SkillGap[] = DEFAULT_GAPS.map((g, i) => ({
+      ...g,
+      id: `default-gap-${i}`,
+      createdAt: now,
+      updatedAt: now,
+    }));
+    localStorage.setItem(GAPS_KEY, JSON.stringify(seeded));
+    return seeded;
   } catch {
     return [];
   }
